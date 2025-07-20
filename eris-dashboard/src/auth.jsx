@@ -1,7 +1,8 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext()
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const nav = useNavigate()
@@ -22,6 +23,13 @@ export function AuthProvider({ children }) {
     setUser(null)
     nav('/login')
   }
+
+  // ✅ Add this block to auto-login as admin for now
+  useEffect(() => {
+    const mockUser = { username: 'melisa-dev', role: 'admin' }
+    setUser(mockUser)
+    nav('/admin')
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
