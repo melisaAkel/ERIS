@@ -77,13 +77,11 @@ def build_custom_model(blocked_set, roads):
     if not blocked_set:
         return {}
     
-    # Try a simpler approach using road_class or highway type
+
     priority = []
     
-    # Block all roads in the blocked areas by using a very restrictive condition
-    # This is a more general approach that should work
     priority.append({
-        "if": "true",  # Apply to all roads, but we'll use areas to be more specific
+        "if": "true",  
         "multiply_by": 1.0
     })
     
@@ -95,18 +93,17 @@ def build_custom_model(blocked_set, roads):
             continue
             
         area_id = f"blocked_area_{i}"
-        
-        # Create a buffer around the entire road
+  
         if len(road['coords']) >= 2:
-            # Create a simple rectangular area covering the road
+
             lats = [coord[0] for coord in road['coords']]
             lons = [coord[1] for coord in road['coords']]
             
             min_lat, max_lat = min(lats), max(lats)
             min_lon, max_lon = min(lons), max(lons)
             
-            # Add small buffer
-            buffer = 0.001  # About 100 meters
+
+            buffer = 0.001  
             coords = [
                 [min_lon - buffer, min_lat - buffer],
                 [max_lon + buffer, min_lat - buffer],
@@ -123,12 +120,12 @@ def build_custom_model(blocked_set, roads):
                 }
             }
     
-    # Add priority rule to block roads in these areas
+
     if areas:
         for area_id in areas.keys():
             priority.append({
                 "if": f"in_{area_id}",
-                "multiply_by": 0.01  # Nearly block but not completely (0.0 might cause issues)
+                "multiply_by": 0.01 
             })
 
     custom_model = {
@@ -146,7 +143,6 @@ def build_custom_model(blocked_set, roads):
         }, f, indent=2)
 
     return custom_model
-
 
 class BlockRoadRequest(BaseModel):
     id: str
@@ -199,8 +195,7 @@ def get_route(req: RouteRequest):
         print(f"GraphHopper response status: {gh_res.status_code}")
         gh_res.raise_for_status()
         result = gh_res.json()
-        
-        # Log some route info
+
         if "paths" in result and len(result["paths"]) > 0:
             path = result["paths"][0]
             print(f"Route found - Distance: {path['distance']}m, Time: {path['time']}ms")
