@@ -170,6 +170,19 @@ def post_blocked_road(req: BlockRoadRequest):
         blocked_roads.discard(req.id)
     return {"success": True, "blocked": list(blocked_roads)}
 
+
+@app.get("/api/roads")
+def get_roads():
+    """Return all cached roads data"""
+    global roads_data
+    if not roads_data:
+        # If no data cached, try to fetch it
+        bbox = (40.9, 28.7, 41.2, 29.1)
+        roads_data = fetch_and_cache_roads(bbox)
+    
+    return roads_data
+
+
 @app.post("/api/route")
 def get_route(req: RouteRequest):
     custom_model = build_custom_model(blocked_roads, roads_data)
@@ -191,7 +204,7 @@ def get_route(req: RouteRequest):
     print(f"Sending payload to GraphHopper: {json.dumps(payload, indent=2)}")
 
     try:
-        gh_res = requests.post("http://localhost:8989/route", json=payload)
+        gh_res = requests.post("http://graphhopper:8989/route", json=payload)
         print(f"GraphHopper response status: {gh_res.status_code}")
         gh_res.raise_for_status()
         result = gh_res.json()
