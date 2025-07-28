@@ -13,40 +13,22 @@ export default function AdminPage() {
 
   // Fetch roads and blocked status on mount
   useEffect(() => {
-    const mockRoads = [
-    {
-      id: 'mock1',
-      name: 'Mock Street A',
-      coords: [
-        [36.9078, 37.0785],
-        [36.9085, 37.0790]
-      ]
-    },
-    {
-      id: 'mock2',
-      name: 'Mock Avenue B',
-      coords: [
-        [36.9090, 37.0795],
-        [36.9100, 37.0800]
-      ]
-    }
-  ]
+  // Fetch roads from your backend
+  fetch('http://localhost:8000/api/roads')
+    .then(res => res.json())
+    .then(data => setRoads(data))
+    .catch(err => console.error('Failed to fetch roads:', err))
 
-  setRoads(mockRoads)
-
-  // Optionally block one by default
-  setBlocked({ mock2: true })
-    /* fetchRoads().then(setRoads).catch(console.error)
-
-    fetch('/api/blocked-roads')
-      .then(res => res.json())
-      .then(data => {
-        const map = {}
-        data.forEach(id => { map[id] = true })
-        setBlocked(map)
-      })
-      .catch(console.error) */
-  }, [])
+  // Fetch blocked roads from backend
+  fetch('http://localhost:8000/api/blocked-roads')
+    .then(res => res.json())
+    .then(data => {
+      const map = {}
+      data.forEach(id => { map[id] = true })
+      setBlocked(map)
+    })
+    .catch(err => console.error('Failed to fetch blocked roads:', err))
+}, [])
 
   // Block/unblock a road
   async function toggleRoad(id) {
@@ -57,7 +39,7 @@ export default function AdminPage() {
       setBlocked(b => ({ ...b, [id]: newStatus }))
 
       try {
-        const res = await fetch('/api/blocked-roads', {
+        const res = await fetch('http://localhost:8000/api/blocked-roads', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, blocked: newStatus }),

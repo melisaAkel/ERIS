@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useAuth } from '../auth'
 import './Login.css'   // ← import the new styles
+const API = import.meta.env.VITE_API_BASE_URL
 
 export default function Login() {
   const { login } = useAuth()

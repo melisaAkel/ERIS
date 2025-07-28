@@ -28,7 +28,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const mockUser = { username: 'melisa-dev', role: 'admin' }
     setUser(mockUser)
-    nav('/admin')
+    if (window.location.pathname === '/' || window.location.pathname === '/login') {
+    nav('/login')
+  }
   }, [])
 
   return (

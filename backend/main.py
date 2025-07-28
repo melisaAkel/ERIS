@@ -155,7 +155,8 @@ class RouteRequest(BaseModel):
 @app.on_event("startup")
 def startup_event():
     global roads_data
-    bbox = (40.9, 28.7, 41.2, 29.1)
+    #bbox = (36.704993, 36.446370, 37.524432, 38.080985) #updated to Gaziantep/ southeast Turkey
+    bbox = [36.70, 37.05, 36.71, 37.06]
     roads_data = fetch_and_cache_roads(bbox)
 
 @app.get("/api/blocked-roads")
@@ -177,7 +178,8 @@ def get_roads():
     global roads_data
     if not roads_data:
         # If no data cached, try to fetch it
-        bbox = (40.9, 28.7, 41.2, 29.1)
+        #bbox = (36.704993, 36.446370, 37.524432, 38.080985)
+        bbox = [36.70, 37.05, 36.71, 37.06]
         roads_data = fetch_and_cache_roads(bbox)
     
     return roads_data
@@ -204,7 +206,7 @@ def get_route(req: RouteRequest):
     print(f"Sending payload to GraphHopper: {json.dumps(payload, indent=2)}")
 
     try:
-        gh_res = requests.post("http://graphhopper:8989/route", json=payload)
+        gh_res = requests.post("http://localhost:8989/route", json=payload)
         print(f"GraphHopper response status: {gh_res.status_code}")
         gh_res.raise_for_status()
         result = gh_res.json()
