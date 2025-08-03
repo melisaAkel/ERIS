@@ -113,7 +113,7 @@ export default function AdminPage() {
       {/* Map */}
       <main style={{ flex: 1 }}>
         <MapContainer
-          center={roads[0]?.coords[0] || [36.9078, 37.0785]}
+          center={roads[0]?.coords[0] || [37.5832862, 36.9300109]}
           zoom={13}
           style={{ height: '100%', width: '100%' }}
         >

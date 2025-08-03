@@ -1,6 +1,7 @@
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 const BBOX = [36.704993, 36.446370, 37.524432, 38.080985]  // Gaziantep
-const SMALL_BBOX = [36.70, 37.05, 36.71, 37.06]
+const SMALL_BBOX = [37.575275, 36.922821, 37.60, 36.95]
+//[36.70, 37.05, 36.71, 37.06]
 export async function fetchRoads(bbox = SMALL_BBOX) {
   const [s,w,n,e] = bbox
   const query = `

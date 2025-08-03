@@ -62,9 +62,11 @@ def fetch_and_cache_roads(bbox):
     print(f"Fetched and cached {len(roads)} roads.")
     return roads
 
-def make_square_around(lat, lon, size_meters=50):
-    meters_per_degree = 111_320
-    delta = size_meters / meters_per_degree / 2
+def meters_to_degrees(meters):
+    return meters / 111_000  # approx conversion at equator
+
+def make_square_around(lat, lon, size_meters=1):
+    delta = meters_to_degrees(size_meters) / 2
     return [
         [lon - delta, lat - delta],
         [lon + delta, lat - delta],
@@ -73,10 +75,11 @@ def make_square_around(lat, lon, size_meters=50):
         [lon - delta, lat - delta]
     ]
 
+
+
 def build_custom_model(blocked_set, roads):
     if not blocked_set:
         return {}
-    
 
     priority = []
     
@@ -88,45 +91,36 @@ def build_custom_model(blocked_set, roads):
     areas = {}
     for i, road_id in enumerate(blocked_set):
         road = next((r for r in roads if r['id'] == road_id), None)
-        if not road or not road['coords']:
-            print(f"Skipping road {road_id}: no data or coordinates")
+        if not road or len(road['coords']) < 2:
             continue
-            
-        area_id = f"blocked_area_{i}"
+
+        coords_list = road["coords"]
   
-        if len(road['coords']) >= 2:
+        for j in range(len(road["coords"])-1):
 
-            lats = [coord[0] for coord in road['coords']]
-            lons = [coord[1] for coord in road['coords']]
-            
-            min_lat, max_lat = min(lats), max(lats)
-            min_lon, max_lon = min(lons), max(lons)
-            
+            lat1, lon1 = coords_list[j]
+            lat2, lon2 = coords_list[j + 1]
 
-            buffer = 0.001  
-            coords = [
-                [min_lon - buffer, min_lat - buffer],
-                [max_lon + buffer, min_lat - buffer],
-                [max_lon + buffer, max_lat + buffer],
-                [min_lon - buffer, max_lat + buffer],
-                [min_lon - buffer, min_lat - buffer]
-            ]
+            center_lat = (lat1 + lat2) / 2
+            center_lon = (lon1 + lon2) / 2
+            
+            area_id = f"blocked_area_{i}_{j}"
+            polygon = make_square_around(center_lat, center_lon, size_meters=1)
             
             areas[area_id] = {
                 "type": "Feature",
+                "properties" : {},
                 "geometry": {
                     "type": "Polygon",
-                    "coordinates": [coords]
+                    "coordinates": [polygon]
                 }
             }
-    
 
-    if areas:
-        for area_id in areas.keys():
             priority.append({
                 "if": f"in_{area_id}",
-                "multiply_by": 0.01 
+                "multiply_by": 0.01
             })
+
 
     custom_model = {
         "priority": priority,
@@ -156,7 +150,7 @@ class RouteRequest(BaseModel):
 def startup_event():
     global roads_data
     #bbox = (36.704993, 36.446370, 37.524432, 38.080985) #updated to Gaziantep/ southeast Turkey
-    bbox = [36.70, 37.05, 36.71, 37.06]
+    bbox = [37.575275, 36.922821, 37.60, 36.95]
     roads_data = fetch_and_cache_roads(bbox)
 
 @app.get("/api/blocked-roads")
