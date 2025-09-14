@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
+import uuid, asyncio
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict
@@ -14,6 +15,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+jobs: Dict[str, dict] = {}
 
 blocked_roads = set()
 roads_data = []
@@ -213,3 +218,60 @@ def get_route(req: RouteRequest):
     except Exception as e:
         print(f"GraphHopper error: {str(e)}")
         return {"error": str(e)}
+    
+
+
+@app.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    job_id = str(uuid.uuid4())
+    file_path = os.path.join(UPLOAD_DIR, f"{job_id}_{file.filename}")
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    jobs[job_id] = {
+        "status": "processing",
+        "file": file_path,
+        "result": None
+    }
+
+    # Simulate background processing after short delay
+    asyncio.create_task(simulate_processing(job_id))
+
+    return {"job_id": job_id, "status": "processing"}
+
+
+async def simulate_processing(job_id: str):
+    await asyncio.sleep(1)
+    jobs[job_id]["status"] = "finished"
+    
+    file_info = jobs[job_id]["file"]
+    jobs[job_id]["result"] = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [37.5832862, 36.9300109]  # center as placeholder
+                },
+                "properties": {"status": "blocked", "id": f"damage_{job_id}"}
+            }
+        ]
+    }
+
+
+
+@app.get("/status/{job_id}")
+async def get_status(job_id: str):
+    if job_id not in jobs:
+        return {"error": "not found"}
+    return {"job_id": job_id, "status": jobs[job_id]["status"]}
+
+
+@app.get("/result/{job_id}")
+async def get_result(job_id: str):
+    if job_id not in jobs:
+        return {"error": "not found"}
+    if jobs[job_id]["status"] != "finished":
+        return {"error": "Job not ready"}
+    return jobs[job_id]["result"]
