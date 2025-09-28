@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Polyline, Tooltip } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { fetchRoads } from '../services/overpass'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
