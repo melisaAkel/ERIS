@@ -160,6 +160,7 @@ export default function MapPage() {
     } else if (type === "damage") {
       setDamagePoint(null)
     }
+    setSelecting(null)
   }
 
 return (
@@ -268,19 +269,19 @@ return (
               : "—"}
           </div>
 
-          <button style={btnStyle(selecting === "from")} onClick={() => toggleSelection("from")}>
+          <button style={btnStyle(selecting === "from")} onClick={() =>(from ? unset("from") : toggleSelection("from"))}>
             {from ? "Reset Start" : "Set Start"}
           </button>
           <button
             style={btnStyle(selecting === "to", !from)}
-            onClick={() => from && toggleSelection("to")}
+            onClick={() => from && (to ? unset("to") : toggleSelection("to"))}
             disabled={!from}
           >
             {to ? "Reset End" : "Set End"}
           </button>
           <button
             style={btnStyle(selecting === "damage", !from || !to)}
-            onClick={() => from && to && toggleSelection("damage")}
+            onClick={() => from && to && (damagePoint ? unset("damage") : toggleSelection("damage"))}
             disabled={!from || !to}
           >
             {damagePoint ? "Reset Damage" : "Set Damage"}
