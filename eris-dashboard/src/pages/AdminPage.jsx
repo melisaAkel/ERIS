@@ -62,6 +62,17 @@ export default function AdminPage() {
       <aside style={{ width: 300, padding: 16, background: '#f4f4f4', overflowY: 'auto' }}>
         <h3>🛑 Block Roads</h3>
 
+      {/* Road Details Panel */}
+        {selectedRoad && (
+          <div style={{ marginTop: 16, padding: 8, background: '#fff', border: '1px solid #ccc' }}>
+            <h4>{selectedRoad.name || `Road ${selectedRoad.id}`}</h4>
+            <p><b>ID:</b> {selectedRoad.id}</p>
+            <button onClick={() => toggleRoad(selectedRoad.id)}>
+              {blocked[selectedRoad.id] ? 'Unblock' : 'Block'} this road
+            </button>
+          </div>
+        )}
+
         {/* Grouped lists */}
         <details open>
           <summary style={{ fontWeight: 'bold' }}>🚫 Blocked Roads</summary>
@@ -97,16 +108,7 @@ export default function AdminPage() {
           </ul>
         </details>
 
-        {/* Road Details Panel */}
-        {selectedRoad && (
-          <div style={{ marginTop: 16, padding: 8, background: '#fff', border: '1px solid #ccc' }}>
-            <h4>{selectedRoad.name || `Road ${selectedRoad.id}`}</h4>
-            <p><b>ID:</b> {selectedRoad.id}</p>
-            <button onClick={() => toggleRoad(selectedRoad.id)}>
-              {blocked[selectedRoad.id] ? 'Unblock' : 'Block'} this road
-            </button>
-          </div>
-        )}
+        
       </aside>
 
       {/* Map */}
